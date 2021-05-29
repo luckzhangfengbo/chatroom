@@ -31,6 +31,7 @@ void *work(void *arg) {
     int *sub = (int *)arg;//下标
     int client_fd = client[*sub].fd;
     struct RecvMsg rmsg;
+    struct Msg msg;
     while (1) {
         
         rmsg = chat_recv(client_fd);
@@ -68,6 +69,7 @@ bool check_online(char *name) {
 int main() {
     int port, server_listen, fd;
     struct RecvMsg recvmsg;
+    struct Msg msg;
     port = atoi(get_value(conf, "SERVER_PORT"));
     printf("%d\n", port);
     client = (struct User *)calloc(MAX_CLIENT, sizeof(struct User));
@@ -90,19 +92,26 @@ int main() {
         }
 
         if (check_online(recvmsg.msg.from)) {
+            msg.flag = 3;
+            strcpy(msg.message, "You have Already login System!");
+            chat_send(msg, fd);
+            close(fd);
+            continue;
+
             //拒绝连接
-        } else {
-            int sub;
-            sub = find_sub();
-            client[sub].online = 1;
-            client[sub].fd = fd;
-            strcpy(client[sub].name, recvmsg.msg.from);
+        } 
+        msg.flag = 2;
+        strcpy(msg.message, "Welcome to this chat room!");
+        chat_send(msg,fd);
+        
+        int sub;
+        sub = find_sub();
+        client[sub].online = 1;
+        client[sub].fd = fd;
+        strcpy(client[sub].name, recvmsg.msg.from);
 
         pthread_create(&client[sub].tid, NULL, work, (void *)&sub);
         //创建子线程去实现
-        }
-
-
 
     }
 
