@@ -27,7 +27,21 @@ struct User *client;
 
 
 void *work(void *arg) {
-    printf("client login!\n");
+    //printf("client login!\n");
+    int *sub = (int *)arg;//下标
+    int client_fd = client[*sub].fd;
+    struct RecvMsg rmsg;
+    while (1) {
+        
+        rmsg = chat_recv(client_fd);
+        if (rmsg.retval < 0) {
+            printf(PINK"Logout: "NONE" %s \n", client[*sub].name);
+            close(client_fd);
+            client[*sub].online = 0;//下线
+            return NULL;
+        }
+        printf(BLUE"%s"NONE" : %s\n",rmsg.msg.from, rmsg.msg.message);
+    }
     return NULL;
 }
 
@@ -84,7 +98,7 @@ int main() {
             client[sub].fd = fd;
             strcpy(client[sub].name, recvmsg.msg.from);
 
-        pthread_create(&client[sub].tid, NULL, work, NULL);
+        pthread_create(&client[sub].tid, NULL, work, (void *)&sub);
         //创建子线程去实现
         }
 
