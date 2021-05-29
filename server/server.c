@@ -31,7 +31,7 @@ void *work(void *arg) {
     int *sub = (int *)arg;//下标
     int client_fd = client[*sub].fd;
     struct RecvMsg rmsg;
-    struct Msg msg;
+    printf(GREEN"Login "NONE" : %s\n", client[*sub].name);
     while (1) {
         
         rmsg = chat_recv(client_fd);
