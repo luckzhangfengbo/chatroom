@@ -45,6 +45,7 @@ int main() {
 
     if (rmsg.msg.flag == 3) {
         close(sockfd);
+        return 1;
     }
     pid_t pid;
     if ((pid = fork()) < 0) {//复制子进程
@@ -58,8 +59,7 @@ int main() {
             getchar();//干掉回车
             chat_send(msg,sockfd);//发
             memset(msg.message, 0, sizeof(msg.message));
-            system("clear");//清空屏幕
-            
+            system("clear");//清空屏幕 
         }
     } else {
         wait(NULL);
