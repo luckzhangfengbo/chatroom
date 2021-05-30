@@ -46,5 +46,21 @@ int main() {
     if (rmsg.msg.flag == 3) {
         close(sockfd);
     }
+    pid_t pid;
+    if ((pid = fork()) < 0) {//复制子进程
+        perror("fork");
+    }
+    if (pid == 0) {
+        system("clear");//清空屏幕
+        while (1) {
+            printf(L_PINK"Please Input Message:"NONE"\n");
+            scanf("%[^\n]s", msg.message);
+            getchar();//干掉回车
+            chat_send(msg,sockfd);//发
+            memset(msg.message, 0, sizeof(msg.message));
+            system("clear");//清空屏幕
+            
+        }
+    }
     return 0;
 }
