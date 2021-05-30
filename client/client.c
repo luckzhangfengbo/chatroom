@@ -64,14 +64,16 @@ int main() {
     }
     if (pid == 0) {
         signal(SIGINT, logout);
-        system("clear");//清空屏幕
-        while (1) {
+        //system("clear");//清空屏幕
+        char c = 'a';
+        while (c != EOF) {
             printf(L_PINK"Please Input Message:"NONE"\n");
             scanf("%[^\n]s", msg.message);
-            getchar();//干掉回车
+            c = getchar();//干掉回车
+            msg.flag = 0;
             chat_send(msg,sockfd);//发
             memset(msg.message, 0, sizeof(msg.message));
-            system("clear");//清空屏幕 
+           // system("clear");//清空屏幕 
         }
     } else {
         FILE *log_fp = fopen(logfile, "w");
