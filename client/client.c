@@ -61,6 +61,8 @@ int main() {
             system("clear");//清空屏幕
             
         }
+    } else {
+        wait(NULL);
     }
     return 0;
 }
