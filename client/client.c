@@ -11,8 +11,10 @@
 #include "../common/color.h"
 char *conf = "./client.conf";
 
+int sockfd;
+char logfile[50] = {0};
 
-void *logout(int signalnum) {
+void logout(int signalnum) {
     close(sockfd);
     printf("recv a signal!");
     exit(1);
@@ -20,11 +22,12 @@ void *logout(int signalnum) {
 }
 
 int main() {
-    int port, sockfd;
+    int port;
     struct Msg msg;
     char ip[20] = {0};
     port = atoi(get_value(conf,"SERVER_PORT"));//复制端口
     strcpy(ip, get_value(conf, "SERVER_IP"));//复制ip
+    strcpy(logfile, get_value(conf, "LOG_FILE"));//复制log_file
 
     printf("ip = %s, port = %d\n", ip, port);
 
@@ -71,6 +74,14 @@ int main() {
             system("clear");//清空屏幕 
         }
     } else {
+        FILE *log_fp = fopen(logfile, "w");
+        struct RecvMsg rmsg;
+        while (1) {
+            rmsg = chat_recv(sockfd);
+            fprintf(log_fp,"%s : %s\n", rmsg.msg.from, rmsg.msg.message);
+            printf("%s : %s\n", rmsg.msg.from, rmsg.msg.message);
+            fflush(log_fp);
+        }
         wait(NULL);
         close(sockfd);
     }
