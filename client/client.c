@@ -11,6 +11,14 @@
 #include "../common/color.h"
 char *conf = "./client.conf";
 
+
+void *logout(int signalnum) {
+    close(sockfd);
+    printf("recv a signal!");
+    exit(1);
+
+}
+
 int main() {
     int port, sockfd;
     struct Msg msg;
@@ -52,6 +60,7 @@ int main() {
         perror("fork");
     }
     if (pid == 0) {
+        signal(SIGINT, logout);
         system("clear");//清空屏幕
         while (1) {
             printf(L_PINK"Please Input Message:"NONE"\n");
@@ -63,6 +72,7 @@ int main() {
         }
     } else {
         wait(NULL);
+        close(sockfd);
     }
     return 0;
 }
