@@ -18,7 +18,6 @@ void logout(int signalnum) {
     close(sockfd);
     printf("recv a signal!");
     exit(1);
-
 }
 
 int main() {
