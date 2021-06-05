@@ -62,8 +62,9 @@ int main() {
         perror("fork");
     }
     if (pid == 0) {
+        sleep(2);
         signal(SIGINT, logout);
-        //system("clear");//清空屏幕
+        system("clear");//清空屏幕
         char c = 'a';
         while (c != EOF) {
             printf(L_PINK"Please Input Message:"NONE"\n");
@@ -72,15 +73,17 @@ int main() {
             msg.flag = 0;
             chat_send(msg,sockfd);//发
             memset(msg.message, 0, sizeof(msg.message));
-           // system("clear");//清空屏幕 
+            system("clear");//清空屏幕 
         }
     } else {
         FILE *log_fp = fopen(logfile, "w");
         struct RecvMsg rmsg;
         while (1) {
             rmsg = chat_recv(sockfd);
-            fprintf(log_fp,"%s : %s\n", rmsg.msg.from, rmsg.msg.message);
-            printf("%s : %s\n", rmsg.msg.from, rmsg.msg.message);
+            if (rmsg.msg.flag == 0) {
+                fprintf(log_fp, L_BLUE"%s"NONE": %s\n", rmsg.msg.from, rmsg.msg.message);
+            }
+           // printf("%s : %s\n", rmsg.msg.from, rmsg.msg.message);
             fflush(log_fp);
         }
         wait(NULL);
