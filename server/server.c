@@ -36,6 +36,15 @@ void send_all(struct Msg msg) {
 }
 
 
+int check_name(char *name) {
+    for (int i = 0; i < MAX_CLIENT; i++) {
+        if (client[i].online && !strcmp(client[i].name, name)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 
 void *work(void *arg) {
     //printf("client login!\n");
@@ -55,8 +64,26 @@ void *work(void *arg) {
         printf(BLUE"%s"NONE" : %s\n",rmsg.msg.from, rmsg.msg.message);
         if(rmsg.msg.flag == 0) {
             send_all(rmsg.msg);
-        } else {
-            printf("这是一个私聊信息");
+        } else if (rmsg.msg.flag == 1){
+            if (rmsg.msg.message[0] == '@') {
+                char to[20] = {0};
+                int i = 1;
+                for (; i <= 20; i++) {
+                    if (rmsg.msg.message[i] == ' ') {
+                        break;
+                    }
+                }
+                strncpy(to, rmsg.msg.message + 1, i - 1);
+                int ind;
+                if ((ind = check_name(to)) > 0) {
+                    //告知不在线
+                    sprintf(rmsg.msg.message, "%s is not online", to);
+                    chat_send(rmsg.msg, client_fd);
+                    continue;
+                }
+                rmsg.msg.flag = 1;
+                chat_send(rmsg.msg, client[ind].fd);
+            }
         }
     }
     return NULL;

@@ -10,13 +10,13 @@
 #include "../common/common.h"
 #include "../common/color.h"
 char *conf = "./client.conf";
-
+struct RecvMsg rmsg;
 int sockfd;
 char logfile[50] = {0};
 
 void logout(int signalnum) {
     close(sockfd);
-    printf("recv a signal!");
+    printf("您已退出!");
     exit(1);
 }
 
@@ -30,6 +30,8 @@ int main() {
 
     printf("ip = %s, port = %d\n", ip, port);
 
+    
+    
 
     //连接
     if ((sockfd = socket_connect(ip, port)) < 0) {
@@ -57,13 +59,13 @@ int main() {
         close(sockfd);
         return 1;
     }
+    signal(SIGINT, logout);
     pid_t pid;
     if ((pid = fork()) < 0) {//复制子进程
         perror("fork");
     }
     if (pid == 0) {
         sleep(2);
-        signal(SIGINT, logout);
         system("clear");//清空屏幕
         char c = 'a';
         while (c != EOF) {
@@ -71,20 +73,23 @@ int main() {
             scanf("%[^\n]s", msg.message);
             c = getchar();//干掉回车
             msg.flag = 0;
+            if (msg.message[0] == '@') {
+                msg.flag = 1;
+                
+            }
             chat_send(msg,sockfd);//发
             memset(msg.message, 0, sizeof(msg.message));
             system("clear");//清空屏幕 
         }
     } else {
-        FILE *log_fp = fopen(logfile, "w");
-        struct RecvMsg rmsg;
+        //FILE *log_fp = fopen(logfile, "w");
+        freopen(logfile, "a+", stdout);
         while (1) {
             rmsg = chat_recv(sockfd);
             if (rmsg.msg.flag == 0) {
-                fprintf(log_fp, L_BLUE"%s"NONE": %s\n", rmsg.msg.from, rmsg.msg.message);
+                printf(L_BLUE"%s"NONE": %s\n", rmsg.msg.from, rmsg.msg.message);
+            fflush(stdout);
             }
-           // printf("%s : %s\n", rmsg.msg.from, rmsg.msg.message);
-            fflush(log_fp);
         }
         wait(NULL);
         close(sockfd);
